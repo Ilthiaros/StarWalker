@@ -9,20 +9,22 @@ public class playerController : MonoBehaviour
     public float moveSpeed = 10.0f;
     private float moveInput;
     public Rigidbody2D rb;
-    public GameObject planet;
+    public GameObject[] planets;
+    public GameObject currentPlanet;
     float maxVelocityChange = 10.0f;
     float walkspeed = 10.0f;
 
     // Start is called before the first frame update
     void Start()
-    {
-        
+    {   
+
     }
 
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-        planet = GameObject.FindGameObjectWithTag("PlanetTest");
+        planets = GameObject.FindGameObjectsWithTag("Planet");
+        currentPlanet = GameObject.Find("InitialPlanet");
     }
 
     // Update is called once per frame
@@ -53,9 +55,26 @@ public class playerController : MonoBehaviour
 
     void Update()
     {
-        // Orient player upright
-        var down = (planet.transform.position - transform.position).normalized;
+
+        // Orient player upright on nearest planet
+        foreach (GameObject planet in planets)
+        {
+
+            CircleCollider2D collider = planet.GetComponent<CircleCollider2D>();
+            Vector3 distanceVector = transform.position - planet.transform.position;
+            float distance = distanceVector.magnitude;
+            Debug.Log("Distance: " + distance);
+
+            if (distance < 2.25f)
+            {
+                currentPlanet = planet;
+            }
+        }
+
+
+        var down = (currentPlanet.transform.position - transform.position).normalized;
         var forward = Vector3.Cross(transform.right, down);
         transform.rotation = Quaternion.LookRotation(-forward, -down);
+
     }
 }
