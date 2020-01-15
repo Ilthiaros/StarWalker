@@ -12,12 +12,13 @@ public class playerController : MonoBehaviour
     public GameObject[] planets;
     public GameObject currentPlanet;
     float maxVelocityChange = 10.0f;
-    float walkspeed = 10.0f;
+    float walkspeed = 100.0f;
+    bool grounded = false;
 
     // Start is called before the first frame update
     void Start()
-    {   
-
+    {
+        
     }
 
     void Awake()
@@ -36,20 +37,24 @@ public class playerController : MonoBehaviour
             rb.AddForce(transform.up * force, ForceMode2D.Impulse);
         }
 
-        // Calculate how fast we should be moving
-        var targetVelocity = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
-        targetVelocity = transform.TransformDirection(targetVelocity);
-        targetVelocity *= walkspeed;
+        if(grounded)
+        {
+            // Calculate how fast we should be moving
+            var targetVelocity = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
+            targetVelocity = transform.TransformDirection(targetVelocity);
+            targetVelocity *= walkspeed;
 
-        // Apply a force that attempts to reach our target velocity
-        Vector3 velocity = rb.velocity;
-        var velocityChange = (targetVelocity - velocity);
-        velocityChange.x = Mathf.Clamp(velocityChange.x, -maxVelocityChange, maxVelocityChange);
-        velocityChange.z = Mathf.Clamp(velocityChange.z, -maxVelocityChange, maxVelocityChange);
-        velocityChange.y = Mathf.Clamp(velocityChange.y, -maxVelocityChange, maxVelocityChange);
-        rb.AddForce(velocityChange, ForceMode2D.Impulse);
+            // Apply a force that attempts to reach our target velocity
+            Vector3 velocity = rb.velocity;
+            var velocityChange = (targetVelocity - velocity);
+            velocityChange.x = Mathf.Clamp(velocityChange.x, -maxVelocityChange, maxVelocityChange);
+            velocityChange.z = Mathf.Clamp(velocityChange.z, -maxVelocityChange, maxVelocityChange);
+            velocityChange.y = Mathf.Clamp(velocityChange.y, -maxVelocityChange, maxVelocityChange);
+            rb.AddForce(velocityChange, ForceMode2D.Impulse);
+        }
 
 
+        grounded = false;
     }
 
 
@@ -76,5 +81,10 @@ public class playerController : MonoBehaviour
         var forward = Vector3.Cross(transform.right, down);
         transform.rotation = Quaternion.LookRotation(-forward, -down);
 
+    }
+
+    void OnCollisionStay2D()
+    {
+        grounded = true;
     }
 }
