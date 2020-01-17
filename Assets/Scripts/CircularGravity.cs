@@ -6,6 +6,7 @@ public class CircularGravity : MonoBehaviour
 {
     public float massOfEarth;
     public Transform[] centerofEarths;
+    public Transform currentPlanet;
     public float G;
 
     float massOfPlayer;
@@ -29,10 +30,21 @@ public class CircularGravity : MonoBehaviour
         
         foreach (Transform centerofEarth in centerofEarths)
         {
-            distance = Vector3.Distance(centerofEarth.transform.position, transform.position);
-            forceValue = G * (massOfPlayer * massOfEarth) / (distance * distance);
-            forceDirection = (centerofEarth.position - transform.position).normalized;
-            rb.AddForce(forceValue * forceDirection);
+            Vector3 distanceVector = transform.position - centerofEarth.transform.position;
+            float distanceToPlanet = distanceVector.magnitude;
+
+            if (distanceToPlanet < 2.35f)
+            {
+                currentPlanet = centerofEarth;
+            } 
         }
+
+        distance = Vector3.Distance(currentPlanet.transform.position, transform.position);
+        //forceValue = G * (massOfPlayer * massOfEarth) / (distance * distance);
+        //Constant Gravity for all planets
+        forceValue = 275.0f;
+        forceDirection = (currentPlanet.position - transform.position).normalized;
+        rb.AddForce(forceValue * forceDirection);
+
     }
 }

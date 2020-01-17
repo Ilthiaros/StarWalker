@@ -5,15 +5,16 @@ using UnityEngine;
 public class playerController : MonoBehaviour
 {
 
-    public float force = 10.0f;
+    public float force = 85.0f;
     public float moveSpeed = 10.0f;
     private float moveInput;
     public Rigidbody2D rb;
     public GameObject[] planets;
     public GameObject currentPlanet;
-    float maxVelocityChange = 10.0f;
+    float maxVelocityChange = 8.0f;
     float walkspeed = 100.0f;
     bool grounded = false;
+    int jumpCounter = 0;
 
     // Start is called before the first frame update
     void Start()
@@ -31,13 +32,23 @@ public class playerController : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        if (Input.GetKeyDown("e"))
+
+        //Jumping
+        if (Input.GetKeyDown("e") && jumpCounter < 2)
         {
+            if (jumpCounter == 1)
+            {
+                rb.AddForce(transform.up * force * Time.deltaTime, ForceMode2D.Force);
+                jumpCounter++;
+            }
             //rb.AddForce(new Vector2(0, force), ForceMode2D.Impulse);
             rb.AddForce(transform.up * force, ForceMode2D.Impulse);
+            jumpCounter++;
         }
+        Debug.Log("Jump_: " + jumpCounter);
 
-        if(grounded)
+        //Walking
+        if (grounded)
         {
             // Calculate how fast we should be moving
             var targetVelocity = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
@@ -53,7 +64,6 @@ public class playerController : MonoBehaviour
             rb.AddForce(velocityChange, ForceMode2D.Impulse);
         }
 
-
         grounded = false;
     }
 
@@ -64,19 +74,14 @@ public class playerController : MonoBehaviour
         // Orient player upright on nearest planet
         foreach (GameObject planet in planets)
         {
-
-            CircleCollider2D collider = planet.GetComponent<CircleCollider2D>();
             Vector3 distanceVector = transform.position - planet.transform.position;
             float distance = distanceVector.magnitude;
-            Debug.Log("Distance: " + distance);
 
             if (distance < 2.25f)
             {
                 currentPlanet = planet;
             }
         }
-
-
         var down = (currentPlanet.transform.position - transform.position).normalized;
         var forward = Vector3.Cross(transform.right, down);
         transform.rotation = Quaternion.LookRotation(-forward, -down);
@@ -85,6 +90,12 @@ public class playerController : MonoBehaviour
 
     void OnCollisionStay2D()
     {
+        grounded = true;
+    }
+
+    void OnCollisionEnter2D()
+    {
+        jumpCounter = 0;
         grounded = true;
     }
 }
